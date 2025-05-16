@@ -1,8 +1,7 @@
 import socket
 import os
 import threading
-import hashlib  # Import hashlib for hashing
-import config  # Ensure config has the CHUNK_SIZE defined
+import hashlib
 
 CHUNK_SIZE = 512
 bootstrap_ip = '192.168.250.105'
@@ -27,26 +26,6 @@ def calculate_hash(file_path):
         return None
 
     return sha256_hash.hexdigest()
-
-def register_with_bootstrap():
-    """Register this node with the bootstrap node."""
-    try:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((bootstrap_ip, bootstrap_port))
-
-        # Send the IP to register
-        local_ip = "192.168.104.10"
-        client_socket.send(local_ip.encode())
-
-        # Receive the list of peers
-        peers_data = client_socket.recv(1024).decode()
-        if peers_data:
-            peers.update(peers_data.split(","))
-            print(f"Received updated peers list: {peers}")
-
-        client_socket.close()
-    except Exception as e:
-        print(f"Failed to register with bootstrap: {e}")
 
 def handle_client(client_socket):
     """Handle communication with a connected client."""
@@ -128,9 +107,6 @@ def client(peer_ip, peer_port, filename):
 def start_node():
     """Main function to start the node as a file-sharing node."""
     port = 5000  # Start file-sharing node on port 5000
-
-    # Register with the bootstrap node
-    register_with_bootstrap()
 
     # Start the file-sharing server in a separate thread
     server_thread = threading.Thread(target=start_server, args=(port,))

@@ -1,9 +1,9 @@
 import socket
 import os
 import threading
-import config  # Ensure config has the CHUNK_SIZE defined
 import time
-import hashlib  # Import hashlib for hashing
+import hashlib
+CHUNK_SIZE = 516
 
 peers = set()  # Use a set for unique connected peers
 lock = threading.Lock()  # Lock for thread-safe access to peers list
@@ -14,7 +14,7 @@ def calculate_hash(file_path):
     try:
         with open(file_path, "rb") as file:
             while True:
-                data = file.read(config.CHUNK_SIZE)
+                data = file.read(CHUNK_SIZE)
                 if not data:
                     break
                 sha256_hash.update(data)
@@ -39,7 +39,7 @@ def get_local_ip():
         s.connect(('8.8.8.8', 80))
         ip_address = s.getsockname()[0]
     except Exception:
-        ip_address = '127.0.0.1'  # Fallback in case of failure
+        ip_address = '127.0.0.1'
     finally:
         s.close()
     return ip_address
@@ -84,10 +84,10 @@ def handle_client(client_socket):
                 client_socket.send(file_hash.encode())  # Send the hash to the client
 
                 with open(message, 'rb') as f:
-                    chunk = f.read(config.CHUNK_SIZE)
+                    chunk = f.read(CHUNK_SIZE)
                     while chunk:
                         client_socket.sendall(chunk)
-                        chunk = f.read(config.CHUNK_SIZE)
+                        chunk = f.read(CHUNK_SIZE)
                 print("File and hash sent successfully.")
             else:
                 client_socket.send(b"File not found")
@@ -121,9 +121,9 @@ def client(peer_ip, peer_port, filename):
             
             with open('downloaded_' + filename, 'wb') as f:
                 while True:
-                    chunk = client_socket.recv(config.CHUNK_SIZE)
+                    chunk = client_socket.recv(CHUNK_SIZE)
                     if not chunk:
-                        break  # Exit loop if no more data
+                        break
                     f.write(chunk)
             print(f"File '{filename}' downloaded successfully.")
 
